@@ -1,0 +1,5 @@
+{
+  "name": "House Management Admin",
+  "description": "An admin-only web app for organizing houses and their members, inventories, and work orders. Features include drag-and-drop member assignment, rich profiles, inventory tracking, and AI-powered reporting.",
+  "requestFramePermissions": []
+}
