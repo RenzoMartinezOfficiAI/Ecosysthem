@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '../../types';
 import { useData } from '../../hooks/useData';
@@ -10,14 +11,17 @@ interface WorkOrderFormProps {
 }
 
 const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClose }) => {
-  const { houses } = useData();
+  const { houses, members } = useData();
+  
+  const staffAndLeads = members.filter(m => m.label === 'staff' || m.label === 'house_lead');
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     houseId: houses.find(h => h.status === 'active')?.id || '',
     priority: 'medium' as WorkOrderPriority,
     status: 'open' as WorkOrderStatus,
-    createdBy: 'Admin', // In a real app, this would come from auth context
+    createdBy: staffAndLeads[0]?.fullName || '', 
   });
 
   useEffect(() => {
@@ -40,8 +44,8 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClos
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.houseId) {
-        alert("Please fill in the title and select a house.");
+    if (!formData.title || !formData.houseId || !formData.createdBy) {
+        alert("Please fill in the title, select a house, and specify the creator.");
         return;
     }
     onSave(formData);
@@ -100,11 +104,22 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClos
                 </div>
             </div>
 
-            <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
-                <select id="status" name="status" value={formData.status} onChange={handleChange} className={inputStyles}>
-                    {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s.replace('_', ' ')}</option>)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                  <label htmlFor="status" className="block text-sm font-medium text-gray-700">Status</label>
+                  <select id="status" name="status" value={formData.status} onChange={handleChange} className={inputStyles}>
+                      {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s.replace('_', ' ')}</option>)}
+                  </select>
+              </div>
+              <div>
+                <label htmlFor="createdBy" className="block text-sm font-medium text-gray-700">Created By</label>
+                <select id="createdBy" name="createdBy" value={formData.createdBy} onChange={handleChange} className={inputStyles} required>
+                    <option value="" disabled>Select creator</option>
+                    {staffAndLeads.map(member => (
+                      <option key={member.id} value={member.fullName}>{member.fullName}</option>
+                    ))}
                 </select>
+              </div>
             </div>
           </div>
           

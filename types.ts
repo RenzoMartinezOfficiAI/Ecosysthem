@@ -21,7 +21,7 @@ export interface House {
 }
 
 export type VeteranStatus = 'veteran' | 'civilian';
-export type MemberLabel = 'house_lead' | 'member' | 'staff' | 'other';
+export type MemberLabel = 'house_lead' | 'member' | 'staff' | 'patient' | 'other';
 export type MemberStatus = 'active' | 'inactive' | 'archived';
 export type BranchOfService = 'army' | 'navy' | 'air_force' | 'marine_corps' | 'coast_guard' | 'space_force';
 
@@ -41,6 +41,21 @@ export interface Member {
   photoUrl: string;
   createdAt: string;
   updatedAt: string;
+
+  // New financial and contact fields
+  monthlyBedspaceFee?: number;
+  incomeAmount?: number;
+  incomeSource?: string;
+  paymentType?: 'self_pay' | 'sponsored';
+  sponsorName?: string;
+  sponsorshipLength?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  mediaReleaseCompleted?: boolean;
+
+  // New medication fields
+  onMedication?: boolean;
+  medications?: string;
 }
 
 export type WorkOrderStatus = 'open' | 'in_progress' | 'completed' | 'cancelled';

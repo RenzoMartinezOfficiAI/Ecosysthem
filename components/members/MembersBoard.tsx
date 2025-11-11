@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useData } from '../../hooks/useData';
@@ -102,6 +101,7 @@ const MembersBoard: React.FC<MembersBoardProps> = ({ searchTerm }) => {
                     <option value="house_lead">House Lead</option>
                     <option value="member">Member</option>
                     <option value="staff">Staff</option>
+                    <option value="patient">Patient</option>
                     <option value="other">Other</option>
                 </select>
                 <select

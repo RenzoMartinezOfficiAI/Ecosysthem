@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -36,7 +37,8 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
           wo.title.toLowerCase().includes(lowercasedTerm) ||
           wo.description.toLowerCase().includes(lowercasedTerm) ||
           houseName.includes(lowercasedTerm) ||
-          (wo.assignedTo && wo.assignedTo.toLowerCase().includes(lowercasedTerm));
+          (wo.assignedTo && wo.assignedTo.toLowerCase().includes(lowercasedTerm)) ||
+          wo.createdBy.toLowerCase().includes(lowercasedTerm);
         
         return statusMatch && priorityMatch && houseMatch && searchMatch;
     });
@@ -146,6 +148,7 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
               <tr>
                 <th className="p-4 font-semibold text-sm text-secondary uppercase">Title</th>
                 <th className="p-4 font-semibold text-sm text-secondary uppercase">House</th>
+                <th className="p-4 font-semibold text-sm text-secondary uppercase">Created By</th>
                 <th className="p-4 font-semibold text-sm text-secondary uppercase">Priority</th>
                 <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
                 <th className="p-4 font-semibold text-sm text-secondary uppercase">Created On</th>
@@ -157,6 +160,7 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
                 <tr key={wo.id} className="border-b border-light-200">
                   <td className="p-4 font-medium text-dark-800">{wo.title}</td>
                   <td className="p-4 text-secondary">{getHouseById(wo.houseId)?.name || 'N/A'}</td>
+                  <td className="p-4 text-secondary">{wo.createdBy}</td>
                   <td className="p-4">
                     <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${priorityColors[wo.priority]}`}>
                       {wo.priority}
@@ -175,7 +179,7 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
               ))}
               {filteredWorkOrders.length === 0 && (
                 <tr>
-                    <td colSpan={6} className="text-center py-12 text-secondary">
+                    <td colSpan={7} className="text-center py-12 text-secondary">
                         <p className="font-semibold">No work orders found</p>
                         <p className="text-sm">Try adjusting your filters or clearing your search.</p>
                     </td>

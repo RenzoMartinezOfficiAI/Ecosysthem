@@ -23,6 +23,7 @@ const MemberCard: React.FC<MemberCardProps> = ({ member, isDragging = false, onE
     house_lead: 'bg-indigo-100 text-indigo-800',
     member: 'bg-blue-100 text-blue-800',
     staff: 'bg-gray-100 text-gray-800',
+    patient: 'bg-teal-100 text-teal-800',
     other: 'bg-green-100 text-green-800',
   };
   

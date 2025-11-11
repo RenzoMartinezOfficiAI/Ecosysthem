@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -18,15 +17,17 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
   // Filter states
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all');
   const [veteranFilter, setVeteranFilter] = useState<VeteranStatus | 'all'>('all');
+  const [labelFilter, setLabelFilter] = useState<MemberLabel | 'all'>('all');
   
   const filteredMembers = useMemo(() => {
     const lowercasedTerm = searchTerm.toLowerCase();
     return members.filter(m => {
         const statusMatch = statusFilter === 'all' || m.status === statusFilter;
         const veteranMatch = veteranFilter === 'all' || m.veteranStatus === veteranFilter;
+        const labelMatch = labelFilter === 'all' || m.label === labelFilter;
         
         if (!searchTerm) {
-          return statusMatch && veteranMatch;
+          return statusMatch && veteranMatch && labelMatch;
         }
 
         const searchMatch = 
@@ -35,9 +36,9 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
           m.phone.toLowerCase().includes(lowercasedTerm) ||
           (getHouseById(m.houseId || '')?.name.toLowerCase().includes(lowercasedTerm));
         
-        return statusMatch && veteranMatch && searchMatch;
+        return statusMatch && veteranMatch && labelMatch && searchMatch;
     });
-  }, [members, statusFilter, veteranFilter, searchTerm, getHouseById]);
+  }, [members, statusFilter, veteranFilter, labelFilter, searchTerm, getHouseById]);
 
   if (loading) return <Spinner />;
   if (error) return <div className="text-red-500">{error}</div>;
@@ -45,6 +46,7 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
   const clearFilters = () => {
     setStatusFilter('all');
     setVeteranFilter('all');
+    setLabelFilter('all');
   };
 
   const handleOpenCreateModal = () => {
@@ -81,11 +83,13 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
     house_lead: 'bg-indigo-100 text-indigo-800',
     member: 'bg-blue-100 text-blue-800',
     staff: 'bg-gray-100 text-gray-800',
+    patient: 'bg-teal-100 text-teal-800',
     other: 'bg-green-100 text-green-800',
   };
 
   const statusOptions: (MemberStatus | 'all')[] = ['all', 'active', 'inactive', 'archived'];
   const veteranOptions: (VeteranStatus | 'all')[] = ['all', 'veteran', 'civilian'];
+  const labelOptions: (MemberLabel | 'all')[] = ['all', 'house_lead', 'member', 'staff', 'patient', 'other'];
   
   const formatLabel = (label: string) => label.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
 
@@ -111,6 +115,12 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
                 <label htmlFor="veteranFilter" className="text-sm font-medium text-secondary">Veteran:</label>
                 <select id="veteranFilter" value={veteranFilter} onChange={e => setVeteranFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
                     {veteranOptions.map(v => <option key={v} value={v} className="capitalize">{v}</option>)}
+                </select>
+            </div>
+            <div className="flex items-center gap-2">
+                <label htmlFor="labelFilter" className="text-sm font-medium text-secondary">Label:</label>
+                <select id="labelFilter" value={labelFilter} onChange={e => setLabelFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                    {labelOptions.map(l => <option key={l} value={l} className="capitalize">{l === 'all' ? 'All' : formatLabel(l)}</option>)}
                 </select>
             </div>
             <button
@@ -188,7 +198,6 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
           initialData={editingMember}
           onSave={handleSaveMember}
           onClose={handleCloseModal}
-          onArchive={archiveMember}
         />
       )}
     </>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Member, VeteranStatus, MemberLabel, BranchOfService, MemberStatus } from '../../types';
 
@@ -22,6 +21,17 @@ const DEFAULT_MEMBER_STATE: Omit<Member, 'id' | 'createdAt' | 'updatedAt'> = {
     houseId: null,
     photoUrl: '',
     branchOfService: undefined,
+    monthlyBedspaceFee: undefined,
+    incomeAmount: undefined,
+    incomeSource: '',
+    paymentType: 'self_pay',
+    sponsorName: '',
+    sponsorshipLength: '',
+    emergencyContactName: '',
+    emergencyContactPhone: '',
+    mediaReleaseCompleted: false,
+    onMedication: false,
+    medications: '',
 };
 
 const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClose, onArchive }) => {
@@ -30,7 +40,7 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialData?.photoUrl || null);
 
   const veteranStatusOptions: VeteranStatus[] = ['veteran', 'civilian'];
-  const memberLabelOptions: MemberLabel[] = ['house_lead', 'member', 'staff', 'other'];
+  const memberLabelOptions: MemberLabel[] = ['house_lead', 'member', 'staff', 'patient', 'other'];
   const memberStatusOptions: MemberStatus[] = ['active', 'inactive', 'archived'];
   const branchOfServiceOptions: { value: BranchOfService; label: string }[] = [
     { value: 'army', label: 'Army' },
@@ -44,7 +54,7 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
   useEffect(() => {
     if (initialData) {
       const { id, createdAt, updatedAt, ...editableData } = initialData;
-      setFormData(editableData);
+      setFormData({ ...DEFAULT_MEMBER_STATE, ...editableData });
       setPreviewUrl(initialData.photoUrl);
     } else {
         setFormData(DEFAULT_MEMBER_STATE);
@@ -64,7 +74,8 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
         branchOfService: undefined,
       });
     } else {
-       setFormData(prev => ({ ...prev, [name]: value }));
+        const isNumberField = name === 'monthlyBedspaceFee' || name === 'incomeAmount';
+        setFormData(prev => ({ ...prev, [name]: isNumberField ? (value === '' ? undefined : Number(value)) : value }));
     }
   };
 
@@ -113,7 +124,7 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
       aria-labelledby="edit-member-title"
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg m-4 overflow-y-auto max-h-[90vh]"
+        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl m-4 overflow-y-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
       >
         <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-200">
@@ -224,6 +235,110 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
                 className={inputStyles}
               />
             </div>
+
+            <fieldset className="border p-4 rounded-md mt-6">
+                <legend className="text-sm font-medium text-gray-700 px-2">Financial Information</legend>
+                <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="monthlyBedspaceFee" className="block text-sm font-medium text-gray-700">Monthly Bedspace Fee</label>
+                            <input type="number" id="monthlyBedspaceFee" name="monthlyBedspaceFee" value={formData.monthlyBedspaceFee || ''} onChange={handleChange} className={inputStyles} placeholder="$" />
+                        </div>
+                        <div>
+                            <label htmlFor="incomeAmount" className="block text-sm font-medium text-gray-700">Income Amount</label>
+                            <input type="number" id="incomeAmount" name="incomeAmount" value={formData.incomeAmount || ''} onChange={handleChange} className={inputStyles} placeholder="$" />
+                        </div>
+                    </div>
+                    <div>
+                        <label htmlFor="incomeSource" className="block text-sm font-medium text-gray-700">Source of Income</label>
+                        <input type="text" id="incomeSource" name="incomeSource" value={formData.incomeSource || ''} onChange={handleChange} className={inputStyles} />
+                    </div>
+                    <div>
+                        <label htmlFor="paymentType" className="block text-sm font-medium text-gray-700">Payment Type</label>
+                        <select id="paymentType" name="paymentType" value={formData.paymentType || 'self_pay'} onChange={handleChange} className={inputStyles}>
+                            <option value="self_pay">Self Pay</option>
+                            <option value="sponsored">Sponsored</option>
+                        </select>
+                    </div>
+                    {formData.paymentType === 'sponsored' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label htmlFor="sponsorName" className="block text-sm font-medium text-gray-700">Sponsor Name</label>
+                                <input type="text" id="sponsorName" name="sponsorName" value={formData.sponsorName || ''} onChange={handleChange} className={inputStyles} />
+                            </div>
+                            <div>
+                                <label htmlFor="sponsorshipLength" className="block text-sm font-medium text-gray-700">Length of Sponsorship</label>
+                                <input type="text" id="sponsorshipLength" name="sponsorshipLength" value={formData.sponsorshipLength || ''} onChange={handleChange} className={inputStyles} />
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </fieldset>
+
+            <fieldset className="border p-4 rounded-md mt-6">
+                <legend className="text-sm font-medium text-gray-700 px-2">Emergency Contact</legend>
+                <div className="space-y-4 pt-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="emergencyContactName" className="block text-sm font-medium text-gray-700">Contact Name</label>
+                            <input type="text" id="emergencyContactName" name="emergencyContactName" value={formData.emergencyContactName || ''} onChange={handleChange} className={inputStyles} />
+                        </div>
+                        <div>
+                            <label htmlFor="emergencyContactPhone" className="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input type="tel" id="emergencyContactPhone" name="emergencyContactPhone" value={formData.emergencyContactPhone || ''} onChange={handleChange} className={inputStyles} />
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset className="border p-4 rounded-md mt-6">
+                <legend className="text-sm font-medium text-gray-700 px-2">Agreements</legend>
+                <div className="pt-2">
+                    <label className="block text-sm font-medium text-gray-700">Media Release Agreement Completed?</label>
+                    <div className="mt-2 flex gap-4">
+                        <label className="inline-flex items-center">
+                            <input type="radio" name="mediaReleaseCompleted" value="true" checked={formData.mediaReleaseCompleted === true} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: true }))} className="form-radio text-primary focus:ring-primary" />
+                            <span className="ml-2">Yes</span>
+                        </label>
+                        <label className="inline-flex items-center">
+                            <input type="radio" name="mediaReleaseCompleted" value="false" checked={formData.mediaReleaseCompleted === false} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: false }))} className="form-radio text-primary focus:ring-primary" />
+                            <span className="ml-2">No</span>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset className="border p-4 rounded-md mt-6">
+                <legend className="text-sm font-medium text-gray-700 px-2">Medication</legend>
+                <div className="pt-2">
+                    <label className="block text-sm font-medium text-gray-700">Is this member on any medication?</label>
+                    <div className="mt-2 flex gap-4">
+                        <label className="inline-flex items-center">
+                            <input type="radio" name="onMedication" value="true" checked={formData.onMedication === true} onChange={() => setFormData(prev => ({ ...prev, onMedication: true }))} className="form-radio text-primary focus:ring-primary" />
+                            <span className="ml-2">Yes</span>
+                        </label>
+                        <label className="inline-flex items-center">
+                            <input type="radio" name="onMedication" value="false" checked={formData.onMedication === false} onChange={() => setFormData(prev => ({ ...prev, onMedication: false, medications: '' }))} className="form-radio text-primary focus:ring-primary" />
+                            <span className="ml-2">No</span>
+                        </label>
+                    </div>
+                </div>
+                {formData.onMedication && (
+                    <div className="mt-4">
+                        <label htmlFor="medications" className="block text-sm font-medium text-gray-700">List of Medications</label>
+                        <textarea
+                            id="medications"
+                            name="medications"
+                            rows={3}
+                            value={formData.medications || ''}
+                            onChange={handleChange}
+                            className={inputStyles}
+                            placeholder="e.g., Aspirin 81mg daily, Lipitor 20mg at night"
+                        />
+                    </div>
+                )}
+            </fieldset>
+
           </div>
           
           <div className="mt-8 flex justify-end gap-3">
