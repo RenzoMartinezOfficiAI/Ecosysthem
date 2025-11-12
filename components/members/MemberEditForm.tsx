@@ -94,12 +94,9 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let dataToSave = { ...formData, photoUrl: previewUrl || formData.photoUrl };
-
-    if (selectedFile) {
-      console.log(`Simulating upload for: ${selectedFile.name}`);
-      dataToSave.photoUrl = URL.createObjectURL(selectedFile);
-    }
+    // The previewUrl is either the original photoUrl or the base64 representation of the new file.
+    // This is sufficient for saving.
+    const dataToSave = { ...formData, photoUrl: previewUrl || formData.photoUrl };
     
     onSave(dataToSave);
   };

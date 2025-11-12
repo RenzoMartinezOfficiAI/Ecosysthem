@@ -12,9 +12,13 @@ interface HouseInventoryViewProps {
 }
 
 const HouseInventoryView: React.FC<HouseInventoryViewProps> = ({ house, onBack, searchTerm }) => {
-  const { inventoryItems, addInventoryItem, updateInventoryItem } = useData();
+  const { inventoryItems, addInventoryItem, updateInventoryItem, bulkUpdateInventoryItems } = useData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [bulkQuantity, setBulkQuantity] = useState<number | ''>('');
+  const [bulkStatus, setBulkStatus] = useState<InventoryItemStatus | ''>('');
+
 
   const houseInventoryItems = useMemo(() => {
     return inventoryItems.filter(item => item.houseId === house.id);
@@ -25,6 +29,48 @@ const HouseInventoryView: React.FC<HouseInventoryViewProps> = ({ house, onBack, 
     if (!searchTerm) return houseInventoryItems;
     return houseInventoryItems.filter(item => item.name.toLowerCase().includes(lowercasedTerm));
   }, [houseInventoryItems, searchTerm]);
+  
+  const isAllSelected = useMemo(() => {
+    return filteredItems.length > 0 && selectedItems.size === filteredItems.length;
+  }, [selectedItems, filteredItems]);
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+      const allItemIds = new Set(filteredItems.map(item => item.id));
+      setSelectedItems(allItemIds);
+    } else {
+      setSelectedItems(new Set());
+    }
+  };
+
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems(prevSelected => {
+      const newSelected = new Set(prevSelected);
+      if (newSelected.has(itemId)) {
+        newSelected.delete(itemId);
+      } else {
+        newSelected.add(itemId);
+      }
+      return newSelected;
+    });
+  };
+
+  const handleBulkUpdateStatus = async () => {
+    if (!bulkStatus || selectedItems.size === 0) return;
+    const itemsToUpdate = Array.from(selectedItems).map(id => ({ id, status: bulkStatus }));
+    await bulkUpdateInventoryItems(itemsToUpdate);
+    setSelectedItems(new Set());
+    setBulkStatus('');
+  };
+
+  const handleBulkUpdateQuantity = async () => {
+    if (bulkQuantity === '' || isNaN(Number(bulkQuantity)) || Number(bulkQuantity) < 0 || selectedItems.size === 0) return;
+    const itemsToUpdate = Array.from(selectedItems).map(id => ({ id, quantity: Number(bulkQuantity) }));
+    await bulkUpdateInventoryItems(itemsToUpdate);
+    setSelectedItems(new Set());
+    setBulkQuantity('');
+  };
+
 
   const handleOpenCreateModal = () => {
     setEditingItem(null);
@@ -83,11 +129,52 @@ const HouseInventoryView: React.FC<HouseInventoryViewProps> = ({ house, onBack, 
           </button>
         </div>
 
+        {selectedItems.size > 0 && (
+          <div className="bg-primary-light p-4 rounded-xl flex flex-wrap items-center justify-between gap-4 border border-primary">
+            <p className="font-semibold text-primary">{selectedItems.size} item{selectedItems.size > 1 ? 's' : ''} selected</p>
+            <div className="flex flex-wrap items-center gap-4">
+               <div className="flex items-center gap-2">
+                <select 
+                    value={bulkStatus}
+                    onChange={(e) => setBulkStatus(e.target.value as InventoryItemStatus)}
+                    className="bg-white border-light-300 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                    <option value="" disabled>Set status...</option>
+                    <option value="in_stock">In Stock</option>
+                    <option value="low_stock">Low Stock</option>
+                    <option value="out_of_stock">Out of Stock</option>
+                </select>
+                <button onClick={handleBulkUpdateStatus} disabled={!bulkStatus} className="bg-primary text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-primary-hover disabled:bg-blue-300">Apply Status</button>
+              </div>
+               <div className="flex items-center gap-2">
+                <input 
+                    type="number" 
+                    placeholder="Set quantity..." 
+                    value={bulkQuantity}
+                    onChange={(e) => setBulkQuantity(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                    className="bg-white border-light-300 rounded-md shadow-sm px-3 py-1.5 text-sm w-32 focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                 <button onClick={handleBulkUpdateQuantity} disabled={bulkQuantity === ''} className="bg-primary text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-primary-hover disabled:bg-blue-300">Apply Qty</button>
+              </div>
+              <button onClick={() => setSelectedItems(new Set())} className="text-sm font-semibold text-primary hover:underline">Deselect All</button>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-xl shadow-md border border-light-300 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead className="bg-light-200">
                   <tr>
+                    <th className="p-4 w-12">
+                      <input 
+                        type="checkbox" 
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        checked={isAllSelected}
+                        onChange={handleSelectAll}
+                        aria-label="Select all items"
+                      />
+                    </th>
                     <th className="p-4 font-semibold text-sm text-secondary uppercase">Item Name</th>
                     <th className="p-4 font-semibold text-sm text-secondary uppercase">Quantity</th>
                     <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
@@ -97,7 +184,16 @@ const HouseInventoryView: React.FC<HouseInventoryViewProps> = ({ house, onBack, 
                 </thead>
                 <tbody className="divide-y divide-light-300">
                   {filteredItems.map((item) => (
-                    <tr key={item.id} className="hover:bg-light-200 transition-colors">
+                    <tr key={item.id} className={`${selectedItems.has(item.id) ? 'bg-primary-light' : 'hover:bg-light-200'} transition-colors`}>
+                      <td className="p-4">
+                        <input 
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          checked={selectedItems.has(item.id)}
+                          onChange={() => handleSelectItem(item.id)}
+                          aria-label={`Select ${item.name}`}
+                        />
+                      </td>
                       <td className="p-4 font-medium text-dark-800">{item.name}</td>
                       <td className="p-4 text-secondary">{item.quantity}</td>
                       <td className="p-4">

@@ -1,6 +1,7 @@
+
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
 // FIX: Import InventoryItem type to support the inventory feature.
-import { House, Member, WorkOrder, Appointment, MaintenanceTask, InventoryItem } from '../types';
+import { House, Member, WorkOrder, Appointment, MaintenanceTask, InventoryItem, InventoryItemStatus } from '../types';
 // FIX: Import getInventoryItems from the mock API.
 import { getHouses, getMembers, getWorkOrders, getAppointments, getMaintenanceTasks, getInventoryItems } from '../services/mockApi';
 import { calculateNextDueDate, getCalculatedTaskStatus } from '../utils/dateUtils';
@@ -32,6 +33,7 @@ interface DataContextType {
   // FIX: Added add/update methods for inventory items to the context type.
   addInventoryItem: (newItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => Promise<void>;
   updateInventoryItem: (updatedItem: InventoryItem) => Promise<void>;
+  bulkUpdateInventoryItems: (updatedItems: Partial<InventoryItem> & { id: string }[]) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -224,6 +226,24 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     );
     console.log(`Updated inventory item ${updatedItem.id}.`);
   };
+  
+  const bulkUpdateInventoryItems = async (itemsToUpdate: (Partial<InventoryItem> & { id: string })[]) => {
+    const updatesMap = new Map(itemsToUpdate.map(item => [item.id, item]));
+    setInventoryItems(prev =>
+      prev.map(item => {
+        const update = updatesMap.get(item.id);
+        if (update) {
+          return {
+            ...item,
+            ...update,
+            lastUpdated: new Date().toISOString(),
+          };
+        }
+        return item;
+      })
+    );
+    console.log(`Bulk updated ${itemsToUpdate.length} inventory items.`);
+  };
 
   const getHouseById = useCallback((houseId: string) => {
     return houses.find(h => h.id === houseId);
@@ -234,7 +254,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, [members]);
 
   // FIX: Added inventory items and their management functions to the context value.
-  const value = { houses, members, workOrders, appointments, maintenanceTasks, inventoryItems, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment, addMaintenanceTask, updateMaintenanceTask, addInventoryItem, updateInventoryItem };
+  const value = { houses, members, workOrders, appointments, maintenanceTasks, inventoryItems, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment, addMaintenanceTask, updateMaintenanceTask, addInventoryItem, updateInventoryItem, bulkUpdateInventoryItems };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
