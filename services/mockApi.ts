@@ -1,4 +1,6 @@
-import { House, Member, WorkOrder, Appointment, InventoryItem } from '../types';
+// FIX: Added InventoryItem to imports to support the new inventory feature.
+import { House, Member, WorkOrder, Appointment, MaintenanceTask, InventoryItem } from '../types';
+import { getCalculatedTaskStatus } from '../utils/dateUtils';
 
 const MOCK_HOUSES: House[] = [
   { id: 'house-1', name: 'Oakwood Residence', address: { street: '123 Oak Ave', city: 'Metropolis', state: 'NY', zip: '10001' }, capacity: 8, status: 'active', tags: ['Sober Living', 'Male'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -21,57 +23,70 @@ const MOCK_WORK_ORDERS: WorkOrder[] = [
     { id: 'wo-1', title: 'Fix leaky faucet in kitchen', description: 'The main kitchen sink has a constant drip.', houseId: 'house-1', status: 'open', priority: 'high', createdBy: 'John Doe', createdAt: new Date('2023-10-26T10:00:00Z').toISOString(), updatedAt: new Date('2023-10-26T10:00:00Z').toISOString() },
     { id: 'wo-2', title: 'Replace porch lightbulb', description: '', houseId: 'house-2', status: 'in_progress', priority: 'low', createdBy: 'Susan Garcia', assignedTo: 'John Doe', createdAt: new Date('2023-10-25T14:30:00Z').toISOString(), updatedAt: new Date('2023-10-26T11:00:00Z').toISOString() },
     { id: 'wo-3', title: 'Mow the lawn', description: 'Front and back yards need mowing.', houseId: 'house-1', status: 'completed', priority: 'medium', createdBy: 'John Doe', assignedTo: 'Peter Jones', createdAt: new Date('2023-10-24T09:00:00Z').toISOString(), updatedAt: new Date('2023-10-25T16:00:00Z').toISOString() },
-    { id: 'wo-4', title: 'Paint common room', description: 'Common room walls are scuffed and need a fresh coat of paint.', houseId: 'house-3', status: 'open', priority: 'medium', createdBy: 'Susan Garcia', createdAt: new Date('2023-10-27T11:00:00Z').toISOString(), updatedAt: new Date('2023-10-27T11:00:00Z').toISOString() },
+    { id: 'wo-4', title: 'Test smoke detectors', description: 'Test all smoke and CO detectors in the house.', houseId: 'house-3', status: 'cancelled', priority: 'medium', createdBy: 'David Brown', createdAt: new Date('2023-10-23T11:00:00Z').toISOString(), updatedAt: new Date('2023-10-23T12:00:00Z').toISOString() },
 ];
-
-const getFutureDate = (days: number, hour: number, minute: number): string => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    date.setHours(hour, minute, 0, 0);
-    return date.toISOString();
-}
 
 const MOCK_APPOINTMENTS: Appointment[] = [
-    { id: 'appt-1', memberId: 'member-1', title: 'Annual Check-up', startDateTime: getFutureDate(3, 10, 0), endDateTime: getFutureDate(3, 11, 0), status: 'scheduled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'appt-2', memberId: 'member-2', title: 'Dental Cleaning', startDateTime: getFutureDate(5, 14, 30), endDateTime: getFutureDate(5, 15, 30), status: 'scheduled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'appt-3', memberId: 'member-3', title: 'Physical Therapy', startDateTime: getFutureDate(3, 10, 0), endDateTime: getFutureDate(3, 11, 0), status: 'completed', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'appt-4', memberId: 'member-4', title: 'Follow-up', startDateTime: getFutureDate(10, 9, 0), endDateTime: getFutureDate(10, 9, 30), status: 'scheduled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'appt-5', memberId: 'member-1', title: 'Specialist Consultation', startDateTime: getFutureDate(12, 11, 0), endDateTime: getFutureDate(12, 12, 0), status: 'cancelled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'appt-1', memberId: 'member-1', title: 'Therapy Session', startDateTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(), endDateTime: new Date(Date.now() + (2 * 24 * 60 * 60 * 1000) + (60 * 60 * 1000)).toISOString(), status: 'scheduled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'appt-2', memberId: 'member-2', title: 'Doctor\'s Appointment', startDateTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), endDateTime: new Date(Date.now() - (1 * 24 * 60 * 60 * 1000) + (45 * 60 * 1000)).toISOString(), status: 'completed', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'appt-3', memberId: 'member-3', title: 'VA Follow-up', startDateTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(), endDateTime: new Date(new Date().setDate(new Date().getDate() + 1) + 60*60000).toISOString(), status: 'scheduled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
+const MOCK_MAINTENANCE_TASKS_DATA: Omit<MaintenanceTask, 'status'>[] = [
+  { id: 'mt-1', houseId: 'house-1', taskName: 'HVAC Filter Replacement', frequency: 'quarterly', lastCompletedDate: '2024-07-01T10:00:00Z', nextDueDate: '2024-10-01T10:00:00Z' },
+  { id: 'mt-2', houseId: 'house-1', taskName: 'Smoke Detector Test', frequency: 'monthly', lastCompletedDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), nextDueDate: new Date().toISOString() }, // Due Today
+  { id: 'mt-3', houseId: 'house-2', taskName: 'Gutter Cleaning', frequency: 'semi-annually', lastCompletedDate: '2024-03-20T10:00:00Z', nextDueDate: '2024-09-20T10:00:00Z' },
+  { id: 'mt-4', houseId: 'house-2', taskName: 'Fire Extinguisher Check', frequency: 'annually', lastCompletedDate: '2024-01-10T10:00:00Z', nextDueDate: '2025-01-10T10:00:00Z' },
+  { id: 'mt-5', houseId: 'house-3', taskName: 'Yard Pest Control', frequency: 'quarterly', lastCompletedDate: '2024-05-01T10:00:00Z', nextDueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() }, // Due Soon
+  { id: 'mt-6', houseId: 'house-1', taskName: 'Plumbing Inspection', frequency: 'annually', lastCompletedDate: '2023-05-01T10:00:00Z', nextDueDate: '2024-05-01T10:00:00Z' }, // Overdue
+];
+
+const MOCK_MAINTENANCE_TASKS: MaintenanceTask[] = MOCK_MAINTENANCE_TASKS_DATA.map(task => ({
+  ...task,
+  status: getCalculatedTaskStatus(task.nextDueDate),
+}));
+
+
+// FIX: Added mock data for inventory items.
 const MOCK_INVENTORY_ITEMS: InventoryItem[] = [
-  { id: 'inv-1', name: 'Toilet Paper (Rolls)', quantity: 50, status: 'in_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-27T10:00:00Z').toISOString() },
-  { id: 'inv-2', name: 'Paper Towels (Rolls)', quantity: 10, status: 'low_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-27T11:00:00Z').toISOString() },
-  { id: 'inv-3', name: 'Dish Soap (Bottles)', quantity: 0, status: 'out_of_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-26T14:00:00Z').toISOString() },
-  { id: 'inv-4', name: 'Trash Bags (Box)', quantity: 5, status: 'in_stock', houseId: 'house-2', lastUpdated: new Date('2023-10-25T09:00:00Z').toISOString() },
-  { id: 'inv-5', name: 'Light Bulbs (Pack)', quantity: 2, status: 'low_stock', houseId: 'house-2', lastUpdated: new Date('2023-10-27T12:00:00Z').toISOString() },
-  { id: 'inv-6', name: 'Cleaning Spray (Bottles)', quantity: 8, status: 'in_stock', houseId: 'house-3', lastUpdated: new Date('2023-10-24T16:00:00Z').toISOString() },
+  { id: 'inv-1', houseId: 'house-1', name: 'Paper Towels', quantity: 10, status: 'in_stock', lastUpdated: new Date().toISOString() },
+  { id: 'inv-2', houseId: 'house-1', name: 'Toilet Paper', quantity: 2, status: 'low_stock', lastUpdated: new Date().toISOString() },
+  { id: 'inv-3', houseId: 'house-2', name: 'Cleaning Spray', quantity: 5, status: 'in_stock', lastUpdated: new Date().toISOString() },
+  { id: 'inv-4', houseId: 'house-2', name: 'Trash Bags', quantity: 0, status: 'out_of_stock', lastUpdated: new Date().toISOString() },
+  { id: 'inv-5', houseId: 'house-3', name: 'Light Bulbs', quantity: 20, status: 'in_stock', lastUpdated: new Date().toISOString() },
 ];
 
-// Simulate network delay
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
+// Simulate API delay
+const apiDelay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getHouses = async (): Promise<House[]> => {
-  await delay(500);
+  await apiDelay(300);
   return MOCK_HOUSES;
 };
 
 export const getMembers = async (): Promise<Member[]> => {
-  await delay(500);
+  await apiDelay(300);
   return MOCK_MEMBERS;
 };
 
 export const getWorkOrders = async (): Promise<WorkOrder[]> => {
-    await delay(500);
+    await apiDelay(300);
     return MOCK_WORK_ORDERS;
 };
 
 export const getAppointments = async (): Promise<Appointment[]> => {
-    await delay(500);
+    await apiDelay(300);
     return MOCK_APPOINTMENTS;
 };
 
+export const getMaintenanceTasks = async (): Promise<MaintenanceTask[]> => {
+  await apiDelay(300);
+  return MOCK_MAINTENANCE_TASKS;
+}
+
+// FIX: Added function to fetch mock inventory items.
 export const getInventoryItems = async (): Promise<InventoryItem[]> => {
-  await delay(500);
+  await apiDelay(300);
   return MOCK_INVENTORY_ITEMS;
-};
+}

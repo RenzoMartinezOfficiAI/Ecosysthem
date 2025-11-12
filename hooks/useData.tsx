@@ -1,12 +1,17 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
-import { House, Member, WorkOrder, Appointment, InventoryItem } from '../types';
-import { getHouses, getMembers, getWorkOrders, getAppointments, getInventoryItems } from '../services/mockApi';
+// FIX: Import InventoryItem type to support the inventory feature.
+import { House, Member, WorkOrder, Appointment, MaintenanceTask, InventoryItem } from '../types';
+// FIX: Import getInventoryItems from the mock API.
+import { getHouses, getMembers, getWorkOrders, getAppointments, getMaintenanceTasks, getInventoryItems } from '../services/mockApi';
+import { calculateNextDueDate, getCalculatedTaskStatus } from '../utils/dateUtils';
 
 interface DataContextType {
   houses: House[];
   members: Member[];
   workOrders: WorkOrder[];
   appointments: Appointment[];
+  maintenanceTasks: MaintenanceTask[];
+  // FIX: Added inventoryItems to the data context type to make it available to components.
   inventoryItems: InventoryItem[];
   loading: boolean;
   error: string | null;
@@ -22,6 +27,9 @@ interface DataContextType {
   getMemberById: (memberId: string) => Member | undefined;
   addAppointment: (newAppointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateAppointment: (updatedAppointment: Appointment) => Promise<void>;
+  addMaintenanceTask: (newTask: Omit<MaintenanceTask, 'id' | 'nextDueDate' | 'status'>) => Promise<void>;
+  updateMaintenanceTask: (updatedTask: MaintenanceTask) => Promise<void>;
+  // FIX: Added add/update methods for inventory items to the context type.
   addInventoryItem: (newItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => Promise<void>;
   updateInventoryItem: (updatedItem: InventoryItem) => Promise<void>;
 }
@@ -33,6 +41,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [members, setMembers] = useState<Member[]>([]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [maintenanceTasks, setMaintenanceTasks] = useState<MaintenanceTask[]>([]);
+  // FIX: Added state to hold inventory items.
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,17 +51,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       setError(null);
-      const [housesData, membersData, workOrdersData, appointmentsData, inventoryData] = await Promise.all([
+      // FIX: Fetched inventory items from the API along with other data.
+      const [housesData, membersData, workOrdersData, appointmentsData, maintenanceData, inventoryData] = await Promise.all([
         getHouses(), 
         getMembers(),
         getWorkOrders(),
         getAppointments(),
+        getMaintenanceTasks(),
         getInventoryItems(),
       ]);
       setHouses(housesData);
       setMembers(membersData);
       setWorkOrders(workOrdersData);
       setAppointments(appointmentsData);
+      
+      const refreshedMaintenanceData = maintenanceData.map(task => {
+        if (task.status !== 'completed') {
+          return { ...task, status: getCalculatedTaskStatus(task.nextDueDate) };
+        }
+        return task;
+      });
+
+      setMaintenanceTasks(refreshedMaintenanceData);
       setInventoryItems(inventoryData);
     } catch (err) {
       setError('Failed to fetch data.');
@@ -163,6 +184,28 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log(`Updated appointment ${updatedAppointment.id}.`);
   };
 
+  const addMaintenanceTask = async (newTaskData: Omit<MaintenanceTask, 'id' | 'nextDueDate' | 'status'>) => {
+    const nextDueDate = calculateNextDueDate(newTaskData.lastCompletedDate, newTaskData.frequency);
+    const newTask: MaintenanceTask = {
+      ...newTaskData,
+      id: `mt-${Date.now()}`,
+      nextDueDate: nextDueDate.toISOString(),
+      status: getCalculatedTaskStatus(nextDueDate.toISOString()),
+    };
+    setMaintenanceTasks(prev => [...prev, newTask]);
+    console.log(`Added maintenance task ${newTask.id}.`);
+  };
+
+  const updateMaintenanceTask = async (updatedTask: MaintenanceTask) => {
+    setMaintenanceTasks(prev =>
+      prev.map(task =>
+        task.id === updatedTask.id ? updatedTask : task
+      )
+    );
+    console.log(`Updated maintenance task ${updatedTask.id}.`);
+  };
+
+  // FIX: Implemented methods to add and update inventory items.
   const addInventoryItem = async (newItemData: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
     const newItem: InventoryItem = {
       ...newItemData,
@@ -182,7 +225,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log(`Updated inventory item ${updatedItem.id}.`);
   };
 
-
   const getHouseById = useCallback((houseId: string) => {
     return houses.find(h => h.id === houseId);
   }, [houses]);
@@ -191,7 +233,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return members.find(m => m.id === memberId);
   }, [members]);
 
-  const value = { houses, members, workOrders, appointments, inventoryItems, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment, addInventoryItem, updateInventoryItem };
+  // FIX: Added inventory items and their management functions to the context value.
+  const value = { houses, members, workOrders, appointments, maintenanceTasks, inventoryItems, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment, addMaintenanceTask, updateMaintenanceTask, addInventoryItem, updateInventoryItem };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };

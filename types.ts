@@ -21,7 +21,8 @@ export interface House {
 }
 
 export type VeteranStatus = 'veteran' | 'civilian';
-export type MemberLabel = 'house_lead' | 'member' | 'staff' | 'patient' | 'other';
+// FIX: Added 'staff' to MemberLabel to support staff members throughout the application.
+export type MemberLabel = 'house_lead' | 'member' | 'patient' | 'other' | 'staff';
 export type MemberStatus = 'active' | 'inactive' | 'archived';
 export type BranchOfService = 'army' | 'navy' | 'air_force' | 'marine_corps' | 'coast_guard' | 'space_force';
 
@@ -89,16 +90,31 @@ export interface Appointment {
   updatedAt: string;
 }
 
+export type MaintenanceTaskFrequency = 'weekly' | 'monthly' | 'quarterly' | 'semi-annually' | 'annually';
+export type MaintenanceTaskStatus = 'overdue' | 'due_today' | 'due_soon' | 'upcoming' | 'completed';
+
+export interface MaintenanceTask {
+  id: string;
+  houseId: string;
+  taskName: string;
+  description?: string;
+  frequency: MaintenanceTaskFrequency;
+  lastCompletedDate: string;
+  nextDueDate: string;
+  status: MaintenanceTaskStatus;
+  assignedTo?: string;
+}
+
+// FIX: Added InventoryItem and InventoryItemStatus types to support the inventory feature.
 export type InventoryItemStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
 
 export interface InventoryItem {
   id: string;
   name: string;
+  houseId: string;
   quantity: number;
   status: InventoryItemStatus;
-  houseId: string;
   lastUpdated: string;
 }
-
 
 export type NavItem = 'dashboard' | 'houses' | 'members' | 'assignments' | 'inventory' | 'work_orders' | 'audit_log' | 'calendar';

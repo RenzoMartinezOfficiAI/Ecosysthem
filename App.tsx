@@ -7,7 +7,7 @@ import { DataProvider } from './hooks/useData';
 import { NavItem } from './types';
 import MemberList from './components/members/MemberList';
 import CalendarView from './components/calendar/CalendarView';
-import InventoryList from './components/inventory/InventoryList';
+import MaintenanceSchedule from './components/maintenance/MaintenanceSchedule';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<NavItem>('members');
@@ -26,7 +26,7 @@ const App: React.FC = () => {
       case 'calendar':
         return <CalendarView searchTerm={searchTerm} />;
       case 'inventory':
-        return <InventoryList searchTerm={searchTerm} />;
+        return <MaintenanceSchedule searchTerm={searchTerm} />;
       default:
         return <MemberList searchTerm={searchTerm} />;
     }

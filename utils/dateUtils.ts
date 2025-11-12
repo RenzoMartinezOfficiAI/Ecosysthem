@@ -1,3 +1,5 @@
+import { MaintenanceTaskFrequency, MaintenanceTaskStatus } from "../types";
+
 export interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;
@@ -53,4 +55,38 @@ export const generateCalendarDays = (currentDate: Date): CalendarDay[] => {
   }
 
   return days;
+};
+
+export const calculateNextDueDate = (lastCompleted: string, frequency: MaintenanceTaskFrequency): Date => {
+    const lastDate = new Date(lastCompleted);
+    switch (frequency) {
+        case 'weekly':
+            return new Date(lastDate.setDate(lastDate.getDate() + 7));
+        case 'monthly':
+            return new Date(lastDate.setMonth(lastDate.getMonth() + 1));
+        case 'quarterly':
+            return new Date(lastDate.setMonth(lastDate.getMonth() + 3));
+        case 'semi-annually':
+            return new Date(lastDate.setMonth(lastDate.getMonth() + 6));
+        case 'annually':
+            return new Date(lastDate.setFullYear(lastDate.getFullYear() + 1));
+        default:
+            return new Date();
+    }
+};
+
+export const getCalculatedTaskStatus = (nextDueDate: string): Exclude<MaintenanceTaskStatus, 'completed'> => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dueDate = new Date(nextDueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    const timeDiff = dueDate.getTime() - today.getTime();
+    const daysDiff = timeDiff / (1000 * 3600 * 24);
+
+    if (daysDiff < 0) return 'overdue';
+    if (daysDiff === 0) return 'due_today';
+    if (daysDiff <= 7) return 'due_soon';
+    return 'upcoming';
 };
