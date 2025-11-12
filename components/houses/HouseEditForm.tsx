@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { House } from '../../types';
 
@@ -55,21 +56,21 @@ const HouseForm: React.FC<HouseFormProps> = ({ initialData, onSave, onClose }) =
     onSave(formData);
   };
 
-  const inputStyles = "mt-1 block w-full px-3 py-2 border border-light-200 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
+  const inputStyles = "mt-1 block w-full px-3 py-2 bg-light-200 border-2 border-transparent rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center"
+      className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="house-form-title"
     >
       <div
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl m-4 overflow-y-auto max-h-[90vh]"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl m-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-200">
+        <div className="flex justify-between items-center p-6 border-b border-light-300">
           <h2 id="house-form-title" className="text-xl font-bold font-display text-dark-900">
             {initialData ? `Edit ${initialData.name}` : 'Add New House'}
           </h2>
@@ -77,15 +78,15 @@ const HouseForm: React.FC<HouseFormProps> = ({ initialData, onSave, onClose }) =
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6">
+          <div className="space-y-6 p-6 max-h-[60vh] overflow-y-auto">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">House Name</label>
               <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} className={inputStyles} required />
             </div>
 
-            <fieldset className="border p-4 rounded-md">
-                <legend className="text-sm font-medium text-gray-700 px-2">Address</legend>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <fieldset className="border-t pt-6">
+                <legend className="text-lg font-semibold text-dark-800 -mt-3">Address</legend>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
                     <div>
                         <label htmlFor="address.street" className="block text-sm font-medium text-gray-700">Street</label>
                         <input type="text" id="address.street" name="address.street" value={formData.address.street} onChange={handleChange} className={inputStyles} />
@@ -125,17 +126,17 @@ const HouseForm: React.FC<HouseFormProps> = ({ initialData, onSave, onClose }) =
             </div>
           </div>
 
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="p-6 flex justify-end gap-3 bg-light-200 border-t border-light-300">
             <button
               type="button"
               onClick={onClose}
-              className="bg-light-100 text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-200 transition-colors"
+              className="bg-white text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-300 transition-colors border border-light-300 shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
             >
               {initialData ? 'Save Changes' : 'Create House'}
             </button>

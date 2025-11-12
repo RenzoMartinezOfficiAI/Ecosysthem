@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useData } from '../../hooks/useData';
 import { MaintenanceTask, MaintenanceTaskStatus, House } from '../../types';
@@ -94,85 +95,80 @@ const HouseMaintenanceView: React.FC<HouseMaintenanceViewProps> = ({ house, onBa
 
   return (
     <>
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 rounded-full hover:bg-light-100">
+      <div className="space-y-6">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <button onClick={onBack} className="p-2 rounded-full hover:bg-light-200 transition-colors">
                 <ChevronLeftIcon className="w-5 h-5 text-secondary" />
             </button>
             <h2 className="text-2xl font-bold font-display text-dark-900">{house.name} Maintenance</h2>
           </div>
           <button 
             onClick={handleOpenCreateModal}
-            className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
           >
             Add New Task
           </button>
         </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-light-100">
-              <tr>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Task</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Frequency</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Last Completed</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Next Due</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map((task) => (
-                <tr key={task.id} className="border-b border-light-200">
-                  <td className="p-4 font-medium text-dark-800">{task.taskName}</td>
-                  <td className="p-4 text-secondary capitalize">{task.frequency.replace('-',' ')}</td>
-                  <td className="p-4 text-secondary">{formatDate(task.lastCompletedDate)}</td>
-                  <td className="p-4 text-secondary font-medium">{formatDate(task.nextDueDate)}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[task.status]}`}>
-                      {statusDisplayNames[task.status]}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-4 items-center">
-                      <select
-                        value={task.status}
-                        onChange={(e) => handleStatusChange(task, e.target.value as MaintenanceTaskStatus)}
-                        className="bg-light-100 border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-                      >
-                        {task.status === 'completed' ? (
-                          <>
-                            <option value="completed">Completed</option>
-                            <option value="upcoming">Revert to Upcoming</option>
-                          </>
-                        ) : (
-                          <>
-                            <option value={task.status} disabled>{statusDisplayNames[task.status]}</option>
-                            <option value="completed">Mark as Completed</option>
-                          </>
-                        )}
-                      </select>
-                      <button 
-                        onClick={() => handleOpenEditModal(task)}
-                        className="text-sm font-semibold text-primary hover:underline"
-                      >
-                        Edit
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+        
+        <div className="bg-white rounded-xl shadow-md border border-light-300 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-light-200">
+                  <tr>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Task</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Frequency</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Last Completed</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Next Due</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-light-300">
+                  {filteredItems.map((task) => (
+                    <tr key={task.id} className="hover:bg-light-200 transition-colors">
+                      <td className="p-4 font-medium text-dark-800">{task.taskName}</td>
+                      <td className="p-4 text-secondary capitalize">{task.frequency.replace('-',' ')}</td>
+                      <td className="p-4 text-secondary">{formatDate(task.lastCompletedDate)}</td>
+                      <td className="p-4 text-secondary font-medium">{formatDate(task.nextDueDate)}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColors[task.status]}`}>
+                          {statusDisplayNames[task.status]}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-4 items-center">
+                          <select
+                            value={task.status === 'completed' ? 'completed' : 'pending'}
+                            onChange={(e) => handleStatusChange(task, e.target.value as MaintenanceTaskStatus)}
+                            className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light"
+                          >
+                           {task.status === 'completed' ? (
+                              <option value="completed">Completed</option>
+                           ) : (
+                              <option value="pending">Mark as...</option>
+                           )}
+                           <option value="completed">Completed</option>
+                          </select>
+                          <button 
+                            onClick={() => handleOpenEditModal(task)}
+                            className="text-sm font-semibold text-primary hover:underline"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
               {filteredItems.length === 0 && (
-                <tr>
-                    <td colSpan={6} className="text-center py-12 text-secondary">
-                        <p className="font-semibold">No maintenance tasks found for this house.</p>
-                        <p className="text-sm">Click "Add New Task" to get started.</p>
-                    </td>
-                </tr>
+                 <div className="text-center py-16 text-secondary">
+                    <h3 className="text-lg font-semibold text-dark-800">No maintenance tasks found</h3>
+                    <p className="text-sm mt-1">Click "Add New Task" to get started.</p>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
         </div>
       </div>
 

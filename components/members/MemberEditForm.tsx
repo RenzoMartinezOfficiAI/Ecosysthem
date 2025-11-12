@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Member, VeteranStatus, MemberLabel, BranchOfService, MemberStatus } from '../../types';
 
@@ -19,7 +20,7 @@ const DEFAULT_MEMBER_STATE: Omit<Member, 'id' | 'createdAt' | 'updatedAt'> = {
     label: 'member',
     description: '',
     houseId: null,
-    photoUrl: '',
+    photoUrl: 'https://picsum.photos/seed/new-member/100', // Default photo
     branchOfService: undefined,
     monthlyBedspaceFee: undefined,
     incomeAmount: undefined,
@@ -58,7 +59,7 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
       setPreviewUrl(initialData.photoUrl);
     } else {
         setFormData(DEFAULT_MEMBER_STATE);
-        setPreviewUrl(null);
+        setPreviewUrl(DEFAULT_MEMBER_STATE.photoUrl);
     }
     setSelectedFile(null);
   }, [initialData]);
@@ -93,7 +94,7 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let dataToSave = { ...formData };
+    let dataToSave = { ...formData, photoUrl: previewUrl || formData.photoUrl };
 
     if (selectedFile) {
       console.log(`Simulating upload for: ${selectedFile.name}`);
@@ -112,33 +113,33 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
     }
   };
   
-  const inputStyles = "mt-1 block w-full px-3 py-2 border border-light-200 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
+  const inputStyles = "mt-1 block w-full px-3 py-2 bg-light-200 border-2 border-transparent rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
   const title = initialData ? `Edit ${initialData.fullName}` : 'Add New Member';
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center"
+      className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-start py-10"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-member-title"
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-2xl m-4 overflow-y-auto max-h-[90vh]"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-2xl m-4"
         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
       >
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-200">
+        <div className="flex justify-between items-center p-6 border-b border-light-300">
           <h2 id="edit-member-title" className="text-xl font-bold font-display text-dark-900">{title}</h2>
           <button onClick={onClose} className="text-secondary hover:text-dark-900 text-2xl font-bold leading-none">&times;</button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
+        <form onSubmit={handleSubmit} className="max-h-[75vh] overflow-y-auto">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center gap-6">
               <img
                 src={previewUrl || 'https://via.placeholder.com/100'}
                 alt="Member photo preview"
-                className="w-20 h-20 rounded-full object-cover bg-light-200"
+                className="w-24 h-24 rounded-full object-cover bg-light-200 border-2 border-light-300"
               />
               <div className="flex-1">
                 <label htmlFor="photoUrl" className="block text-sm font-medium text-gray-700">
@@ -159,10 +160,18 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
                 />
               </div>
             </div>
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
-              <input type="text" id="fullName" name="fullName" value={formData.fullName || ''} onChange={handleChange} className={inputStyles} required />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">Full Name</label>
+                <input type="text" id="fullName" name="fullName" value={formData.fullName || ''} onChange={handleChange} className={inputStyles} required />
+              </div>
+               <div>
+                    <label htmlFor="dob" className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                    <input type="date" id="dob" name="dob" value={formData.dob || ''} onChange={handleChange} className={inputStyles} />
+                </div>
             </div>
+
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -173,16 +182,12 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
                     <input type="tel" id="phone" name="phone" value={formData.phone || ''} onChange={handleChange} className={inputStyles} />
                 </div>
             </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label htmlFor="dob" className="block text-sm font-medium text-gray-700">Date of Birth</label>
-                    <input type="date" id="dob" name="dob" value={formData.dob || ''} onChange={handleChange} className={inputStyles} />
-                </div>
-                <div>
-                    <label htmlFor="insuranceProvider" className="block text-sm font-medium text-gray-700">Insurance Provider</label>
-                    <input type="text" id="insuranceProvider" name="insuranceProvider" value={formData.insuranceProvider || ''} onChange={handleChange} className={inputStyles} />
-                </div>
+            
+            <div>
+                <label htmlFor="insuranceProvider" className="block text-sm font-medium text-gray-700">Insurance Provider</label>
+                <input type="text" id="insuranceProvider" name="insuranceProvider" value={formData.insuranceProvider || ''} onChange={handleChange} className={inputStyles} />
             </div>
+
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label htmlFor="veteranStatus" className="block text-sm font-medium text-gray-700">Veteran Status</label>
@@ -236,9 +241,9 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
               />
             </div>
 
-            <fieldset className="border p-4 rounded-md mt-6">
-                <legend className="text-sm font-medium text-gray-700 px-2">Financial Information</legend>
-                <div className="space-y-4 pt-2">
+            <fieldset className="border-t pt-6">
+                <legend className="text-lg font-semibold text-dark-800 -mt-3">Financial Information</legend>
+                <div className="space-y-4 pt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label htmlFor="monthlyBedspaceFee" className="block text-sm font-medium text-gray-700">Monthly Bedspace Fee</label>
@@ -275,9 +280,9 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
                 </div>
             </fieldset>
 
-            <fieldset className="border p-4 rounded-md mt-6">
-                <legend className="text-sm font-medium text-gray-700 px-2">Emergency Contact</legend>
-                <div className="space-y-4 pt-2">
+            <fieldset className="border-t pt-6">
+                <legend className="text-lg font-semibold text-dark-800 -mt-3">Emergency Contact</legend>
+                <div className="space-y-4 pt-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label htmlFor="emergencyContactName" className="block text-sm font-medium text-gray-700">Contact Name</label>
@@ -291,34 +296,34 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
                 </div>
             </fieldset>
 
-            <fieldset className="border p-4 rounded-md mt-6">
-                <legend className="text-sm font-medium text-gray-700 px-2">Agreements</legend>
-                <div className="pt-2">
+            <fieldset className="border-t pt-6">
+                <legend className="text-lg font-semibold text-dark-800 -mt-3">Agreements</legend>
+                <div className="pt-4">
                     <label className="block text-sm font-medium text-gray-700">Media Release Agreement Completed?</label>
-                    <div className="mt-2 flex gap-4">
+                    <div className="mt-2 flex gap-6">
                         <label className="inline-flex items-center">
-                            <input type="radio" name="mediaReleaseCompleted" value="true" checked={formData.mediaReleaseCompleted === true} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: true }))} className="form-radio text-primary focus:ring-primary" />
+                            <input type="radio" name="mediaReleaseCompleted" value="true" checked={formData.mediaReleaseCompleted === true} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: true }))} className="form-radio h-4 w-4 text-primary focus:ring-primary" />
                             <span className="ml-2">Yes</span>
                         </label>
                         <label className="inline-flex items-center">
-                            <input type="radio" name="mediaReleaseCompleted" value="false" checked={formData.mediaReleaseCompleted === false} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: false }))} className="form-radio text-primary focus:ring-primary" />
+                            <input type="radio" name="mediaReleaseCompleted" value="false" checked={formData.mediaReleaseCompleted === false} onChange={() => setFormData(prev => ({ ...prev, mediaReleaseCompleted: false }))} className="form-radio h-4 w-4 text-primary focus:ring-primary" />
                             <span className="ml-2">No</span>
                         </label>
                     </div>
                 </div>
             </fieldset>
 
-            <fieldset className="border p-4 rounded-md mt-6">
-                <legend className="text-sm font-medium text-gray-700 px-2">Medication</legend>
-                <div className="pt-2">
+            <fieldset className="border-t pt-6">
+                <legend className="text-lg font-semibold text-dark-800 -mt-3">Medication</legend>
+                <div className="pt-4">
                     <label className="block text-sm font-medium text-gray-700">Is this member on any medication?</label>
-                    <div className="mt-2 flex gap-4">
+                    <div className="mt-2 flex gap-6">
                         <label className="inline-flex items-center">
-                            <input type="radio" name="onMedication" value="true" checked={formData.onMedication === true} onChange={() => setFormData(prev => ({ ...prev, onMedication: true }))} className="form-radio text-primary focus:ring-primary" />
+                            <input type="radio" name="onMedication" value="true" checked={formData.onMedication === true} onChange={() => setFormData(prev => ({ ...prev, onMedication: true }))} className="form-radio h-4 w-4 text-primary focus:ring-primary" />
                             <span className="ml-2">Yes</span>
                         </label>
                         <label className="inline-flex items-center">
-                            <input type="radio" name="onMedication" value="false" checked={formData.onMedication === false} onChange={() => setFormData(prev => ({ ...prev, onMedication: false, medications: '' }))} className="form-radio text-primary focus:ring-primary" />
+                            <input type="radio" name="onMedication" value="false" checked={formData.onMedication === false} onChange={() => setFormData(prev => ({ ...prev, onMedication: false, medications: '' }))} className="form-radio h-4 w-4 text-primary focus:ring-primary" />
                             <span className="ml-2">No</span>
                         </label>
                     </div>
@@ -341,12 +346,12 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
 
           </div>
           
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="p-6 flex justify-end gap-3 bg-light-200 border-t border-light-300">
             {initialData && onArchive && initialData.status !== 'archived' && (
                 <button
                     type="button"
                     onClick={handleArchive}
-                    className="mr-auto px-4 py-2 rounded-lg font-semibold text-error hover:bg-red-50 transition-colors"
+                    className="mr-auto px-4 py-2 rounded-lg font-semibold text-error hover:bg-red-100 transition-colors"
                 >
                     Archive Member
                 </button>
@@ -354,13 +359,13 @@ const MemberEditForm: React.FC<MemberFormProps> = ({ initialData, onSave, onClos
             <button
               type="button"
               onClick={onClose}
-              className="bg-light-100 text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-200 transition-colors"
+              className="bg-white text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-300 transition-colors border border-light-300 shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
             >
               Save Changes
             </button>

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -53,9 +54,9 @@ const MaintenanceSchedule: React.FC<MaintenanceScheduleProps> = ({ searchTerm })
             <div 
               key={house.id} 
               onClick={() => setSelectedHouse(house)}
-              className="bg-white rounded-xl shadow-md border border-light-200 flex flex-col overflow-hidden transition-transform duration-200 hover:-translate-y-1 cursor-pointer"
+              className="bg-white rounded-xl shadow-md border border-light-300 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
             >
-              <div className="p-4 flex justify-between items-start">
+              <div className="p-5 flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg text-dark-900">{house.name}</h3>
                   <p className="text-sm text-secondary">{totalTasks} scheduled task{totalTasks !== 1 ? 's' : ''}</p>
@@ -64,7 +65,7 @@ const MaintenanceSchedule: React.FC<MaintenanceScheduleProps> = ({ searchTerm })
                   <CalendarDaysIcon className="w-6 h-6 text-primary" />
                 </div>
               </div>
-              <div className="p-4 border-t border-light-200">
+              <div className="p-5 border-t border-light-300">
                 {overdueOrDueCount > 0 ? (
                   <p className="text-sm font-semibold text-warning">{overdueOrDueCount} task{overdueOrDueCount !== 1 ? 's' : ''} due or overdue</p>
                 ) : (
@@ -76,9 +77,9 @@ const MaintenanceSchedule: React.FC<MaintenanceScheduleProps> = ({ searchTerm })
         })}
       </div>
        {filteredHouses.length === 0 && (
-            <div className="text-center py-12 text-secondary bg-white rounded-xl shadow-sm">
-                <p className="font-semibold">No houses found</p>
-                <p className="text-sm">Try clearing your search.</p>
+            <div className="text-center py-16 text-secondary bg-white rounded-xl shadow-sm border border-light-300">
+                <h3 className="text-lg font-semibold text-dark-800">No houses found</h3>
+                <p className="text-sm mt-1">Try clearing your search.</p>
             </div>
         )}
     </div>

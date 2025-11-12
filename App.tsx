@@ -4,17 +4,24 @@ import MembersBoard from './components/members/MembersBoard';
 import HouseList from './components/houses/HouseList';
 import WorkOrderList from './components/work_orders/WorkOrderList';
 import { DataProvider } from './hooks/useData';
-import { NavItem } from './types';
+import { NavItem, User } from './types';
 import MemberList from './components/members/MemberList';
 import CalendarView from './components/calendar/CalendarView';
 import MaintenanceSchedule from './components/maintenance/MaintenanceSchedule';
+import InventoryList from './components/inventory/InventoryList';
+import Dashboard from './components/dashboard/Dashboard';
+import SmartReportGenerator from './components/reports/SmartReportGenerator';
+import { AuthProvider, useAuth } from './hooks/useAuth';
+import LoginScreen from './components/auth/LoginScreen';
 
-const App: React.FC = () => {
-  const [activeView, setActiveView] = useState<NavItem>('members');
+const AppContent: React.FC = () => {
+  const [activeView, setActiveView] = useState<NavItem>('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
 
   const renderActiveView = () => {
     switch (activeView) {
+      case 'dashboard':
+        return <Dashboard setActiveView={setActiveView} />;
       case 'houses':
         return <HouseList searchTerm={searchTerm} />;
       case 'members':
@@ -26,9 +33,13 @@ const App: React.FC = () => {
       case 'calendar':
         return <CalendarView searchTerm={searchTerm} />;
       case 'inventory':
+        return <InventoryList searchTerm={searchTerm} />;
+      case 'maintenance':
         return <MaintenanceSchedule searchTerm={searchTerm} />;
+      case 'reporting':
+        return <SmartReportGenerator />;
       default:
-        return <MemberList searchTerm={searchTerm} />;
+        return <Dashboard setActiveView={setActiveView} />;
     }
   };
 
@@ -46,4 +57,16 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+const App: React.FC = () => {
+    const { isAuthenticated, user, login, logout } = useAuth();
+
+    return isAuthenticated ? <AppContent /> : <LoginScreen onLogin={login} />;
+}
+
+const AppWrapper: React.FC = () => (
+    <AuthProvider>
+        <App />
+    </AuthProvider>
+);
+
+export default AppWrapper;

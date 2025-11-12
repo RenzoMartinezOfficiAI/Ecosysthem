@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -46,9 +47,9 @@ const InventoryList: React.FC<InventoryListProps> = ({ searchTerm }) => {
             <div 
               key={house.id} 
               onClick={() => setSelectedHouse(house)}
-              className="bg-white rounded-xl shadow-md border border-light-200 flex flex-col overflow-hidden transition-transform duration-200 hover:-translate-y-1 cursor-pointer"
+              className="bg-white rounded-xl shadow-md border border-light-300 flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 cursor-pointer"
             >
-              <div className="p-4 flex justify-between items-start">
+              <div className="p-5 flex justify-between items-start">
                 <div>
                   <h3 className="font-bold text-lg text-dark-900">{house.name}</h3>
                   <p className="text-sm text-secondary">{totalItems} item{totalItems !== 1 ? 's' : ''} in inventory</p>
@@ -57,7 +58,7 @@ const InventoryList: React.FC<InventoryListProps> = ({ searchTerm }) => {
                   <CubeIcon className="w-6 h-6 text-primary" />
                 </div>
               </div>
-              <div className="p-4 border-t border-light-200">
+              <div className="p-5 border-t border-light-300">
                 {lowStockItems > 0 ? (
                   <p className="text-sm font-semibold text-warning">{lowStockItems} item{lowStockItems !== 1 ? 's' : ''} running low or out of stock</p>
                 ) : (
@@ -69,9 +70,9 @@ const InventoryList: React.FC<InventoryListProps> = ({ searchTerm }) => {
         })}
       </div>
        {filteredHouses.length === 0 && (
-            <div className="text-center py-12 text-secondary bg-white rounded-xl shadow-sm">
-                <p className="font-semibold">No houses found</p>
-                <p className="text-sm">Try clearing your search.</p>
+            <div className="text-center py-16 text-secondary bg-white rounded-xl shadow-sm border border-light-300">
+                <h3 className="text-lg font-semibold text-dark-800">No houses found</h3>
+                <p className="text-sm mt-1">Try clearing your search.</p>
             </div>
         )}
     </div>

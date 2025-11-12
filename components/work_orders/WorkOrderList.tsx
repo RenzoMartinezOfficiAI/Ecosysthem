@@ -1,5 +1,4 @@
 
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -82,11 +81,11 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
     open: 'bg-blue-100 text-primary',
     in_progress: 'bg-yellow-100 text-warning',
     completed: 'bg-green-100 text-success',
-    cancelled: 'bg-gray-100 text-gray-500',
+    cancelled: 'bg-gray-200 text-secondary',
   };
 
   const priorityColors: Record<WorkOrderPriority, string> = {
-    low: 'bg-gray-100 text-secondary',
+    low: 'bg-gray-200 text-secondary',
     medium: 'bg-yellow-100 text-warning',
     high: 'bg-red-100 text-error',
   };
@@ -105,31 +104,31 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
 
   return (
     <>
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold font-display text-dark-900">Work Orders</h2>
-          <button onClick={handleOpenCreateModal} className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors">
-            Create Work Order
-          </button>
+      <div className="space-y-6">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+            <h2 className="text-2xl font-bold font-display text-dark-900">Work Orders</h2>
+            <button onClick={handleOpenCreateModal} className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm">
+                Create Work Order
+            </button>
         </div>
         
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-light-100 rounded-lg">
+        <div className="flex flex-wrap gap-4 items-center p-4 bg-white rounded-xl shadow-sm border border-light-300">
             <div className="flex items-center gap-2">
                 <label htmlFor="statusFilter" className="text-sm font-medium text-secondary">Status:</label>
-                <select id="statusFilter" value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s === 'all' ? 'All' : s.replace('_', ' ')}</option>)}
+                <select id="statusFilter" value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
+                    {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s === 'all' ? 'All Statuses' : s.replace('_', ' ')}</option>)}
                 </select>
             </div>
             <div className="flex items-center gap-2">
                 <label htmlFor="priorityFilter" className="text-sm font-medium text-secondary">Priority:</label>
-                <select id="priorityFilter" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    {priorityOptions.map(p => <option key={p} value={p} className="capitalize">{p}</option>)}
+                <select id="priorityFilter" value={priorityFilter} onChange={e => setPriorityFilter(e.target.value as any)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
+                    {priorityOptions.map(p => <option key={p} value={p} className="capitalize">{p === 'all' ? 'All Priorities' : p}</option>)}
                 </select>
             </div>
              <div className="flex items-center gap-2">
                 <label htmlFor="houseFilter" className="text-sm font-medium text-secondary">House:</label>
-                <select id="houseFilter" value={houseFilter} onChange={e => setHouseFilter(e.target.value)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                <select id="houseFilter" value={houseFilter} onChange={e => setHouseFilter(e.target.value)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
                     <option value="all">All Houses</option>
                     {houses.filter(h => h.status === 'active').map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
@@ -142,51 +141,51 @@ const WorkOrderList: React.FC<WorkOrderListProps> = ({ searchTerm }) => {
             </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-light-100">
-              <tr>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Title</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">House</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Created By</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Priority</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Created On</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredWorkOrders.map((wo) => (
-                <tr key={wo.id} className="border-b border-light-200">
-                  <td className="p-4 font-medium text-dark-800">{wo.title}</td>
-                  <td className="p-4 text-secondary">{getHouseById(wo.houseId)?.name || 'N/A'}</td>
-                  <td className="p-4 text-secondary">{wo.createdBy}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${priorityColors[wo.priority]}`}>
-                      {wo.priority}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[wo.status]}`}>
-                      {wo.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="p-4 text-secondary">{formatDate(wo.createdAt)}</td>
-                  <td className="p-4">
-                    <button onClick={() => handleOpenEditModal(wo)} className="text-primary hover:underline font-semibold">Edit</button>
-                  </td>
-                </tr>
-              ))}
-              {filteredWorkOrders.length === 0 && (
-                <tr>
-                    <td colSpan={7} className="text-center py-12 text-secondary">
-                        <p className="font-semibold">No work orders found</p>
-                        <p className="text-sm">Try adjusting your filters or clearing your search.</p>
-                    </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="bg-white rounded-xl shadow-md border border-light-300 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-light-200">
+                  <tr>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Title</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">House</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Created By</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Priority</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Created On</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-light-300">
+                  {filteredWorkOrders.map((wo) => (
+                    <tr key={wo.id} className="hover:bg-light-200 transition-colors">
+                      <td className="p-4 font-medium text-dark-800">{wo.title}</td>
+                      <td className="p-4 text-secondary">{getHouseById(wo.houseId)?.name || 'N/A'}</td>
+                      <td className="p-4 text-secondary">{wo.createdBy}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${priorityColors[wo.priority]}`}>
+                          {wo.priority}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[wo.status]}`}>
+                          {wo.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="p-4 text-secondary">{formatDate(wo.createdAt)}</td>
+                      <td className="p-4">
+                        <button onClick={() => handleOpenEditModal(wo)} className="text-primary hover:underline font-semibold">Edit</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+               {filteredWorkOrders.length === 0 && (
+                    <div className="text-center py-16 text-secondary">
+                        <h3 className="text-lg font-semibold text-dark-800">No work orders found</h3>
+                        <p className="text-sm mt-1">Try adjusting your filters or clearing your search.</p>
+                    </div>
+                )}
+            </div>
         </div>
       </div>
       {isModalOpen && (

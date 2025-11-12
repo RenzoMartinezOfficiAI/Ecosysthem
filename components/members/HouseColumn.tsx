@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { House, Member } from '../../types';
@@ -27,9 +28,9 @@ const HouseColumn: React.FC<HouseColumnProps> = ({ house, children }) => {
   return (
     <div
       ref={setNodeRef}
-      className={`w-80 flex-shrink-0 h-full bg-light-100 rounded-xl flex flex-col transition-colors ${isOver ? 'bg-primary-light' : ''}`}
+      className={`w-80 flex-shrink-0 h-full bg-light-200 rounded-xl flex flex-col transition-colors duration-300 ${isOver ? 'bg-primary-light' : ''}`}
     >
-      <div className="p-4 border-b-2 border-light-200">
+      <div className="p-4 border-b-2 border-light-300">
         <h3 className="font-bold text-lg text-dark-900">{house?.name || 'Unassigned'}</h3>
         <p className="text-sm text-secondary">
           {house ? `${memberCount} / ${house.capacity} Residents` : `${memberCount} Members`}

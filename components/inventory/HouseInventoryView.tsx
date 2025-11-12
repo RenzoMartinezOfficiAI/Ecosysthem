@@ -1,3 +1,4 @@
+
 import React, { useMemo, useState } from 'react';
 import { useData } from '../../hooks/useData';
 import { InventoryItem, InventoryItemStatus, House } from '../../types';
@@ -66,64 +67,64 @@ const HouseInventoryView: React.FC<HouseInventoryViewProps> = ({ house, onBack, 
 
   return (
     <>
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-4">
-            <button onClick={onBack} className="p-2 rounded-full hover:bg-light-100">
+      <div className="space-y-6">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <button onClick={onBack} className="p-2 rounded-full hover:bg-light-200 transition-colors">
                 <ChevronLeftIcon className="w-5 h-5 text-secondary" />
             </button>
             <h2 className="text-2xl font-bold font-display text-dark-900">{house.name} Inventory</h2>
           </div>
           <button 
             onClick={handleOpenCreateModal}
-            className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
           >
             Add New Item
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-light-100">
-              <tr>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Item Name</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Quantity</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Last Updated</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredItems.map((item) => (
-                <tr key={item.id} className="border-b border-light-200">
-                  <td className="p-4 font-medium text-dark-800">{item.name}</td>
-                  <td className="p-4 text-secondary">{item.quantity}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[item.status]}`}>
-                      {item.status.replace('_', ' ')}
-                    </span>
-                  </td>
-                  <td className="p-4 text-secondary">{formatDate(item.lastUpdated)}</td>
-                  <td className="p-4">
-                    <button 
-                      onClick={() => handleOpenEditModal(item)}
-                      className="text-primary hover:underline font-semibold"
-                    >
-                      Edit
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {filteredItems.length === 0 && (
-                <tr>
-                    <td colSpan={5} className="text-center py-12 text-secondary">
-                        <p className="font-semibold">No inventory items found for this house.</p>
-                        <p className="text-sm">Click "Add New Item" to get started.</p>
-                    </td>
-                </tr>
+        <div className="bg-white rounded-xl shadow-md border border-light-300 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-light-200">
+                  <tr>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Item Name</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Quantity</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Last Updated</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-light-300">
+                  {filteredItems.map((item) => (
+                    <tr key={item.id} className="hover:bg-light-200 transition-colors">
+                      <td className="p-4 font-medium text-dark-800">{item.name}</td>
+                      <td className="p-4 text-secondary">{item.quantity}</td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[item.status]}`}>
+                          {item.status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="p-4 text-secondary">{formatDate(item.lastUpdated)}</td>
+                      <td className="p-4">
+                        <button 
+                          onClick={() => handleOpenEditModal(item)}
+                          className="text-primary hover:underline font-semibold"
+                        >
+                          Edit
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+               {filteredItems.length === 0 && (
+                 <div className="text-center py-16 text-secondary">
+                    <h3 className="text-lg font-semibold text-dark-800">No inventory items found</h3>
+                    <p className="text-sm mt-1">Click "Add New Item" to get started.</p>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useData } from '../../hooks/useData';
 import Spinner from '../ui/Spinner';
@@ -76,13 +77,13 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
   const statusColors: Record<MemberStatus, string> = {
     active: 'bg-green-100 text-success',
     inactive: 'bg-yellow-100 text-warning',
-    archived: 'bg-gray-100 text-gray-500',
+    archived: 'bg-gray-200 text-secondary',
   };
 
   const labelColors: Record<MemberLabel, string> = {
     house_lead: 'bg-indigo-100 text-indigo-800',
     member: 'bg-blue-100 text-blue-800',
-    staff: 'bg-gray-100 text-gray-800',
+    staff: 'bg-gray-200 text-gray-800',
     patient: 'bg-teal-100 text-teal-800',
     other: 'bg-green-100 text-green-800',
   };
@@ -95,32 +96,32 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
 
   return (
     <>
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold font-display text-dark-900">Members</h2>
-          <button onClick={handleOpenCreateModal} className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors">
-            Add Member
-          </button>
+      <div className="space-y-6">
+         <div className="flex flex-wrap justify-between items-center gap-4">
+            <h2 className="text-2xl font-bold font-display text-dark-900">Members</h2>
+            <button onClick={handleOpenCreateModal} className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm">
+                Add Member
+            </button>
         </div>
         
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center mb-6 p-4 bg-light-100 rounded-lg">
+        <div className="flex flex-wrap gap-4 items-center p-4 bg-white rounded-xl shadow-sm border border-light-300">
             <div className="flex items-center gap-2">
                 <label htmlFor="statusFilter" className="text-sm font-medium text-secondary">Status:</label>
-                <select id="statusFilter" value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s}</option>)}
+                <select id="statusFilter" value={statusFilter} onChange={e => setStatusFilter(e.target.value as any)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
+                    {statusOptions.map(s => <option key={s} value={s} className="capitalize">{s === 'all' ? 'All Statuses' : s}</option>)}
                 </select>
             </div>
             <div className="flex items-center gap-2">
                 <label htmlFor="veteranFilter" className="text-sm font-medium text-secondary">Veteran:</label>
-                <select id="veteranFilter" value={veteranFilter} onChange={e => setVeteranFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    {veteranOptions.map(v => <option key={v} value={v} className="capitalize">{v}</option>)}
+                <select id="veteranFilter" value={veteranFilter} onChange={e => setVeteranFilter(e.target.value as any)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
+                    {veteranOptions.map(v => <option key={v} value={v} className="capitalize">{v === 'all' ? 'All' : v}</option>)}
                 </select>
             </div>
             <div className="flex items-center gap-2">
                 <label htmlFor="labelFilter" className="text-sm font-medium text-secondary">Label:</label>
-                <select id="labelFilter" value={labelFilter} onChange={e => setLabelFilter(e.target.value as any)} className="bg-white border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary">
-                    {labelOptions.map(l => <option key={l} value={l} className="capitalize">{l === 'all' ? 'All' : formatLabel(l)}</option>)}
+                <select id="labelFilter" value={labelFilter} onChange={e => setLabelFilter(e.target.value as any)} className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light">
+                    {labelOptions.map(l => <option key={l} value={l} className="capitalize">{l === 'all' ? 'All Labels' : formatLabel(l)}</option>)}
                 </select>
             </div>
             <button
@@ -131,66 +132,66 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
             </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-light-100">
-              <tr>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Member</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Contact</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">House</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Label</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
-                <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMembers.map((member) => (
-                <tr key={member.id} className="border-b border-light-200">
-                  <td className="p-4">
-                     <div className="flex items-center gap-3">
-                        <img src={member.photoUrl} alt={member.fullName} className="w-10 h-10 rounded-full object-cover"/>
-                        <div>
-                            <p className="font-medium text-dark-800 flex items-center gap-1.5">
-                                {member.fullName}
-                                {member.veteranStatus === 'veteran' && (
-                                    <span title="Veteran"><ShieldCheckIcon className="w-4 h-4 text-primary"/></span>
-                                )}
-                            </p>
+        <div className="bg-white rounded-xl shadow-md border border-light-300 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-light-200">
+                  <tr>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Member</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Contact</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">House</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Label</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Status</th>
+                    <th className="p-4 font-semibold text-sm text-secondary uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-light-300">
+                  {filteredMembers.map((member) => (
+                    <tr key={member.id} className="hover:bg-light-200 transition-colors">
+                      <td className="p-4">
+                         <div className="flex items-center gap-4">
+                            <img src={member.photoUrl} alt={member.fullName} className="w-10 h-10 rounded-full object-cover"/>
+                            <div>
+                                <p className="font-medium text-dark-800 flex items-center gap-1.5">
+                                    {member.fullName}
+                                    {member.veteranStatus === 'veteran' && (
+                                        <span title="Veteran"><ShieldCheckIcon className="w-4 h-4 text-primary"/></span>
+                                    )}
+                                </p>
+                            </div>
+                         </div>
+                      </td>
+                      <td className="p-4 text-secondary">
+                        <p className="text-sm">{member.email}</p>
+                        <p className="text-sm text-gray-500">{member.phone}</p>
+                      </td>
+                      <td className="p-4 text-secondary">{getHouseById(member.houseId || '')?.name || <span className="italic">Unassigned</span>}</td>
+                      <td className="p-4">
+                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${labelColors[member.label]}`}>
+                          {formatLabel(member.label)}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[member.status]}`}>
+                          {member.status}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex gap-4">
+                            <button onClick={() => handleOpenEditModal(member)} className="text-primary hover:underline font-semibold text-sm">Edit</button>
                         </div>
-                     </div>
-                  </td>
-                  <td className="p-4 text-secondary">
-                    <p className="text-sm">{member.email}</p>
-                    <p className="text-sm">{member.phone}</p>
-                  </td>
-                  <td className="p-4 text-secondary">{getHouseById(member.houseId || '')?.name || <span className="italic">Unassigned</span>}</td>
-                  <td className="p-4">
-                     <span className={`px-2 py-1 text-xs font-semibold rounded-full ${labelColors[member.label]}`}>
-                      {formatLabel(member.label)}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${statusColors[member.status]}`}>
-                      {member.status}
-                    </span>
-                  </td>
-                  <td className="p-4">
-                    <div className="flex gap-4">
-                        <button onClick={() => handleOpenEditModal(member)} className="text-primary hover:underline font-semibold text-sm">Edit</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+                {filteredMembers.length === 0 && (
+                     <div className="text-center py-16 text-secondary">
+                        <h3 className="text-lg font-semibold text-dark-800">No members found</h3>
+                        <p className="text-sm mt-1">Try adjusting your filters or clearing your search.</p>
                     </div>
-                  </td>
-                </tr>
-              ))}
-              {filteredMembers.length === 0 && (
-                <tr>
-                    <td colSpan={6} className="text-center py-12 text-secondary">
-                        <p className="font-semibold">No members found</p>
-                        <p className="text-sm">Try adjusting your filters or clearing your search.</p>
-                    </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+            </div>
         </div>
       </div>
       {isModalOpen && (
@@ -198,6 +199,7 @@ const MemberList: React.FC<MemberListProps> = ({ searchTerm }) => {
           initialData={editingMember}
           onSave={handleSaveMember}
           onClose={handleCloseModal}
+          onArchive={archiveMember}
         />
       )}
     </>

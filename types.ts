@@ -1,5 +1,13 @@
 export type UserRole = 'admin' | 'staff';
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatarUrl: string;
+}
+
 export interface House {
   id: string;
   name: string;
@@ -117,4 +125,4 @@ export interface InventoryItem {
   lastUpdated: string;
 }
 
-export type NavItem = 'dashboard' | 'houses' | 'members' | 'assignments' | 'inventory' | 'work_orders' | 'audit_log' | 'calendar';
+export type NavItem = 'dashboard' | 'houses' | 'members' | 'assignments' | 'inventory' | 'work_orders' | 'audit_log' | 'calendar' | 'maintenance' | 'reporting';

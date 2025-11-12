@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Appointment, AppointmentStatus } from '../../types';
 import { useData } from '../../hooks/useData';
@@ -79,22 +80,22 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ initialData, onClose 
     onClose();
   };
   
-  const inputStyles = "mt-1 block w-full px-3 py-2 border border-light-200 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
+  const inputStyles = "mt-1 block w-full px-3 py-2 bg-light-200 border-2 border-transparent rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
   const statusOptions: AppointmentStatus[] = ['scheduled', 'completed', 'cancelled', 'no_show'];
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center"
+      className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="appointment-form-title"
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg m-4 overflow-y-auto max-h-[90vh]"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-200">
+        <div className="flex justify-between items-center p-6 border-b border-light-300">
           <h2 id="appointment-form-title" className="text-xl font-bold font-display text-dark-900">
             {initialData ? 'Edit Appointment' : 'Add Appointment'}
           </h2>
@@ -102,7 +103,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ initialData, onClose 
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6">
+          <div className="space-y-6 p-6 max-h-[60vh] overflow-y-auto">
             <div>
                 <label htmlFor="memberId" className="block text-sm font-medium text-gray-700">Member</label>
                 <select id="memberId" name="memberId" value={formData.memberId} onChange={handleChange} className={inputStyles} required>
@@ -148,17 +149,17 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ initialData, onClose 
             </div>
           </div>
           
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="p-6 flex justify-end gap-3 bg-light-200 border-t border-light-300">
             <button
               type="button"
               onClick={onClose}
-              className="bg-light-100 text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-200 transition-colors"
+              className="bg-white text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-300 transition-colors border border-light-300 shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
             >
               {initialData ? 'Save Changes' : 'Add Appointment'}
             </button>

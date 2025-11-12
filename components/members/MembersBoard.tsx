@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { DndContext, DragEndEvent, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { useData } from '../../hooks/useData';
@@ -91,11 +92,11 @@ const MembersBoard: React.FC<MembersBoardProps> = ({ searchTerm }) => {
     <div className="flex flex-col h-full">
         <div className="flex flex-wrap gap-4 justify-between items-center mb-6 px-1">
             <h2 className="text-2xl font-bold font-display text-dark-900">Member Assignments</h2>
-            <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-4 flex-wrap p-2 bg-white rounded-xl shadow-sm border border-light-300">
                  <select
                     value={labelFilter}
                     onChange={(e) => setLabelFilter(e.target.value as MemberLabel | 'all')}
-                    className="bg-light-100 border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light"
                 >
                     <option value="all">All Labels</option>
                     <option value="house_lead">House Lead</option>
@@ -107,7 +108,7 @@ const MembersBoard: React.FC<MembersBoardProps> = ({ searchTerm }) => {
                 <select
                     value={veteranStatusFilter}
                     onChange={(e) => setVeteranStatusFilter(e.target.value as VeteranStatus | 'all')}
-                    className="bg-light-100 border-light-200 rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                    className="bg-light-200 border-transparent rounded-md shadow-sm px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-light"
                 >
                     <option value="all">All Statuses</option>
                     <option value="veteran">Veteran</option>

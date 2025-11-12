@@ -1,5 +1,4 @@
 
-
 import React, { useState, useEffect } from 'react';
 import { WorkOrder, WorkOrderStatus, WorkOrderPriority } from '../../types';
 import { useData } from '../../hooks/useData';
@@ -51,23 +50,23 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClos
     onSave(formData);
   };
   
-  const inputStyles = "mt-1 block w-full px-3 py-2 border border-light-200 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
+  const inputStyles = "mt-1 block w-full px-3 py-2 bg-light-200 border-2 border-transparent rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm";
   const statusOptions: WorkOrderStatus[] = ['open', 'in_progress', 'completed', 'cancelled'];
   const priorityOptions: WorkOrderPriority[] = ['low', 'medium', 'high'];
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 z-40 flex justify-center items-center"
+      className="fixed inset-0 bg-black bg-opacity-60 z-40 flex justify-center items-center"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="work-order-title"
     >
       <div 
-        className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-lg m-4 overflow-y-auto max-h-[90vh]"
+        className="bg-white rounded-xl shadow-2xl w-full max-w-lg m-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center mb-6 pb-4 border-b border-light-200">
+        <div className="flex justify-between items-center p-6 border-b border-light-300">
           <h2 id="work-order-title" className="text-xl font-bold font-display text-dark-900">
             {workOrder ? 'Edit Work Order' : 'Create Work Order'}
           </h2>
@@ -75,7 +74,7 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClos
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-6">
+          <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
               <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} className={inputStyles} required />
@@ -123,17 +122,17 @@ const WorkOrderForm: React.FC<WorkOrderFormProps> = ({ workOrder, onSave, onClos
             </div>
           </div>
           
-          <div className="mt-8 flex justify-end gap-3">
+          <div className="p-6 flex justify-end gap-3 bg-light-200 border-t border-light-300">
             <button
               type="button"
               onClick={onClose}
-              className="bg-light-100 text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-200 transition-colors"
+              className="bg-white text-dark-800 px-4 py-2 rounded-lg font-semibold hover:bg-light-300 transition-colors border border-light-300 shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-hover transition-colors shadow-sm"
             >
               {workOrder ? 'Save Changes' : 'Create Work Order'}
             </button>
