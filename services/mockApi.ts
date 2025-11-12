@@ -1,4 +1,4 @@
-import { House, Member, WorkOrder, Appointment } from '../types';
+import { House, Member, WorkOrder, Appointment, InventoryItem } from '../types';
 
 const MOCK_HOUSES: House[] = [
   { id: 'house-1', name: 'Oakwood Residence', address: { street: '123 Oak Ave', city: 'Metropolis', state: 'NY', zip: '10001' }, capacity: 8, status: 'active', tags: ['Sober Living', 'Male'], createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -39,6 +39,15 @@ const MOCK_APPOINTMENTS: Appointment[] = [
     { id: 'appt-5', memberId: 'member-1', title: 'Specialist Consultation', startDateTime: getFutureDate(12, 11, 0), endDateTime: getFutureDate(12, 12, 0), status: 'cancelled', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
+const MOCK_INVENTORY_ITEMS: InventoryItem[] = [
+  { id: 'inv-1', name: 'Toilet Paper (Rolls)', quantity: 50, status: 'in_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-27T10:00:00Z').toISOString() },
+  { id: 'inv-2', name: 'Paper Towels (Rolls)', quantity: 10, status: 'low_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-27T11:00:00Z').toISOString() },
+  { id: 'inv-3', name: 'Dish Soap (Bottles)', quantity: 0, status: 'out_of_stock', houseId: 'house-1', lastUpdated: new Date('2023-10-26T14:00:00Z').toISOString() },
+  { id: 'inv-4', name: 'Trash Bags (Box)', quantity: 5, status: 'in_stock', houseId: 'house-2', lastUpdated: new Date('2023-10-25T09:00:00Z').toISOString() },
+  { id: 'inv-5', name: 'Light Bulbs (Pack)', quantity: 2, status: 'low_stock', houseId: 'house-2', lastUpdated: new Date('2023-10-27T12:00:00Z').toISOString() },
+  { id: 'inv-6', name: 'Cleaning Spray (Bottles)', quantity: 8, status: 'in_stock', houseId: 'house-3', lastUpdated: new Date('2023-10-24T16:00:00Z').toISOString() },
+];
+
 // Simulate network delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
@@ -60,4 +69,9 @@ export const getWorkOrders = async (): Promise<WorkOrder[]> => {
 export const getAppointments = async (): Promise<Appointment[]> => {
     await delay(500);
     return MOCK_APPOINTMENTS;
+};
+
+export const getInventoryItems = async (): Promise<InventoryItem[]> => {
+  await delay(500);
+  return MOCK_INVENTORY_ITEMS;
 };

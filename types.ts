@@ -89,5 +89,16 @@ export interface Appointment {
   updatedAt: string;
 }
 
+export type InventoryItemStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  status: InventoryItemStatus;
+  houseId: string;
+  lastUpdated: string;
+}
+
 
 export type NavItem = 'dashboard' | 'houses' | 'members' | 'assignments' | 'inventory' | 'work_orders' | 'audit_log' | 'calendar';

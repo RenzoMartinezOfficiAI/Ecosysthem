@@ -1,12 +1,13 @@
 import React, { createContext, useState, useContext, useEffect, useCallback, ReactNode } from 'react';
-import { House, Member, WorkOrder, Appointment } from '../types';
-import { getHouses, getMembers, getWorkOrders, getAppointments } from '../services/mockApi';
+import { House, Member, WorkOrder, Appointment, InventoryItem } from '../types';
+import { getHouses, getMembers, getWorkOrders, getAppointments, getInventoryItems } from '../services/mockApi';
 
 interface DataContextType {
   houses: House[];
   members: Member[];
   workOrders: WorkOrder[];
   appointments: Appointment[];
+  inventoryItems: InventoryItem[];
   loading: boolean;
   error: string | null;
   moveMember: (memberId: string, newHouseId: string | null) => Promise<void>;
@@ -21,6 +22,8 @@ interface DataContextType {
   getMemberById: (memberId: string) => Member | undefined;
   addAppointment: (newAppointment: Omit<Appointment, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   updateAppointment: (updatedAppointment: Appointment) => Promise<void>;
+  addInventoryItem: (newItem: Omit<InventoryItem, 'id' | 'lastUpdated'>) => Promise<void>;
+  updateInventoryItem: (updatedItem: InventoryItem) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -30,6 +33,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [members, setMembers] = useState<Member[]>([]);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,16 +41,18 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     try {
       setLoading(true);
       setError(null);
-      const [housesData, membersData, workOrdersData, appointmentsData] = await Promise.all([
+      const [housesData, membersData, workOrdersData, appointmentsData, inventoryData] = await Promise.all([
         getHouses(), 
         getMembers(),
         getWorkOrders(),
         getAppointments(),
+        getInventoryItems(),
       ]);
       setHouses(housesData);
       setMembers(membersData);
       setWorkOrders(workOrdersData);
       setAppointments(appointmentsData);
+      setInventoryItems(inventoryData);
     } catch (err) {
       setError('Failed to fetch data.');
       console.error(err);
@@ -157,6 +163,26 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     console.log(`Updated appointment ${updatedAppointment.id}.`);
   };
 
+  const addInventoryItem = async (newItemData: Omit<InventoryItem, 'id' | 'lastUpdated'>) => {
+    const newItem: InventoryItem = {
+      ...newItemData,
+      id: `inv-${Date.now()}`,
+      lastUpdated: new Date().toISOString(),
+    };
+    setInventoryItems(prev => [...prev, newItem]);
+    console.log(`Added inventory item ${newItem.id}.`);
+  };
+
+  const updateInventoryItem = async (updatedItem: InventoryItem) => {
+    setInventoryItems(prev =>
+      prev.map(item =>
+        item.id === updatedItem.id ? { ...updatedItem, lastUpdated: new Date().toISOString() } : item
+      )
+    );
+    console.log(`Updated inventory item ${updatedItem.id}.`);
+  };
+
+
   const getHouseById = useCallback((houseId: string) => {
     return houses.find(h => h.id === houseId);
   }, [houses]);
@@ -165,7 +191,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return members.find(m => m.id === memberId);
   }, [members]);
 
-  const value = { houses, members, workOrders, appointments, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment };
+  const value = { houses, members, workOrders, appointments, inventoryItems, loading, error, moveMember, addMember, updateMember, archiveMember, addWorkOrder, updateWorkOrder, addHouse, updateHouse, getHouseById, getMemberById, addAppointment, updateAppointment, addInventoryItem, updateInventoryItem };
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
